@@ -33,3 +33,8 @@ apps/api/src/generated/prisma/
 # Uploaded source files
 /storage/
 /apps/api/storage/
+# Test build output
+/apps/api/dist-test/
+
+# Temporary upload tests
+/test-upload/

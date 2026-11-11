@@ -1,0 +1,22 @@
+
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "outDir": "./dist-test",
+        "rootDir": ".",
+        "types": ["node"],
+        "noEmitOnError": true
+    },
+    "include": [
+        "src/impact/risk-assessment.ts",
+        "tests/**/*.ts",
+        "src/generated/prisma/**/*.ts"
+    ]
+}

@@ -2,7 +2,7 @@ import {
     Injectable,
     InternalServerErrorException
 } from "@nestjs/common";
-
+import { readFile } from "node:fs/promises";
 import {
     mkdir,
     unlink,
@@ -62,7 +62,21 @@ export class StorageService {
             );
         }
     }
-
+    async read(projectId: string, storageKey: string): Promise<Buffer> {
+        if (!storageKey.startsWith(`${projectId}/`)) {
+            throw new Error("Invalid storage key.");
+        }
+    
+        const absolutePath = this.resolveStoragePath(storageKey);
+    
+        try {
+            return await readFile(absolutePath);
+        } catch {
+            throw new InternalServerErrorException(
+                "Unable to read source file."
+            );
+        }
+    }
     async delete(
         projectId: string,
         storageKey: string

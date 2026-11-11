@@ -12,7 +12,7 @@
     "node": ">=24"
   },
   "devDependencies": {
-    "typescript": "^7.0.2"
+    "typescript": "^5.9.3"
   },
   "allowScripts": {
     "prisma@7.10.1": true,

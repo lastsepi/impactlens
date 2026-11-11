@@ -20,6 +20,8 @@
     },
     "scripts": {
         "build": "tsc -p tsconfig.json",
+        "build:test": "tsc -p tsconfig.test.json",
+        "test": "npm run build:test && node --test dist-test/tests/**/*.test.js",
         "start": "node dist/main.js"
     },
     "devDependencies": {
