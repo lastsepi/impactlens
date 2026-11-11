@@ -1,0 +1,161 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AnalysisStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum SymbolKind {
+  CLASS
+  METHOD
+  FUNCTION
+  INTERFACE
+  ENUM
+  PROPERTY
+  FIELD
+  VARIABLE
+  CONSTRUCTOR
+  MODULE
+  TYPE_ALIAS
+}
+
+enum DependencyType {
+  CALLS
+  IMPORTS
+  EXTENDS
+  IMPLEMENTS
+  REFERENCES
+  READS
+  WRITES
+  USES
+}
+
+enum ImpactLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model Project {
+  id              String        @id @default(uuid()) @db.Uuid
+  name            String
+  description     String?       @db.Text
+  repositoryUrl   String?
+  primaryLanguage String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  sourceFiles     SourceFile[]
+  analysisRuns    AnalysisRun[]
+}
+
+model SourceFile {
+  id             String       @id @default(uuid()) @db.Uuid
+  projectId      String       @db.Uuid
+  path           String
+  language       String
+  sizeBytes      Int?
+  contentHash    String?
+  lastAnalyzedAt DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  project        Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  symbols        CodeSymbol[]
+
+  @@unique([projectId, path])
+  @@index([projectId])
+  @@index([contentHash])
+}
+
+model AnalysisRun {
+  id             String         @id @default(uuid()) @db.Uuid
+  projectId      String         @db.Uuid
+  status         AnalysisStatus @default(PENDING)
+  analyzerVersion String
+  filesScanned   Int            @default(0)
+  errorMessage   String?        @db.Text
+  startedAt      DateTime?
+  finishedAt     DateTime?
+  createdAt      DateTime       @default(now())
+
+  project        Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  symbols        CodeSymbol[]
+  dependencies   Dependency[]
+  impactResults  ImpactResult[]
+
+  @@index([projectId, createdAt])
+  @@index([status])
+}
+
+model CodeSymbol {
+  id             String       @id @default(uuid()) @db.Uuid
+  analysisRunId   String       @db.Uuid
+  sourceFileId    String       @db.Uuid
+  name           String
+  qualifiedName  String?
+  kind           SymbolKind
+  startLine      Int
+  endLine        Int
+  createdAt      DateTime     @default(now())
+
+  analysisRun    AnalysisRun  @relation(fields: [analysisRunId], references: [id], onDelete: Cascade)
+  sourceFile     SourceFile   @relation(fields: [sourceFileId], references: [id], onDelete: Cascade)
+
+  outgoingDependencies Dependency[] @relation("DependencySource")
+  incomingDependencies Dependency[] @relation("DependencyTarget")
+  impactAsChanged      ImpactResult[] @relation("ChangedSymbol")
+  impactAsAffected     ImpactResult[] @relation("AffectedSymbol")
+
+  @@index([analysisRunId, sourceFileId])
+  @@index([qualifiedName])
+  @@index([kind])
+}
+
+model Dependency {
+  id             String         @id @default(uuid()) @db.Uuid
+  analysisRunId  String         @db.Uuid
+  sourceSymbolId String         @db.Uuid
+  targetSymbolId String         @db.Uuid
+  type           DependencyType
+  createdAt      DateTime       @default(now())
+
+  analysisRun    AnalysisRun    @relation(fields: [analysisRunId], references: [id], onDelete: Cascade)
+  sourceSymbol   CodeSymbol     @relation("DependencySource", fields: [sourceSymbolId], references: [id], onDelete: Cascade)
+  targetSymbol   CodeSymbol     @relation("DependencyTarget", fields: [targetSymbolId], references: [id], onDelete: Cascade)
+
+  @@unique([analysisRunId, sourceSymbolId, targetSymbolId, type])
+  @@index([analysisRunId])
+  @@index([targetSymbolId])
+}
+
+model ImpactResult {
+  id              String       @id @default(uuid()) @db.Uuid
+  analysisRunId   String       @db.Uuid
+  changedSymbolId String       @db.Uuid
+  affectedSymbolId String      @db.Uuid
+  level           ImpactLevel
+  reason          String       @db.Text
+  depth           Int          @default(1)
+  score           Float?
+  createdAt       DateTime     @default(now())
+
+  analysisRun     AnalysisRun  @relation(fields: [analysisRunId], references: [id], onDelete: Cascade)
+  changedSymbol   CodeSymbol   @relation("ChangedSymbol", fields: [changedSymbolId], references: [id], onDelete: Cascade)
+  affectedSymbol  CodeSymbol   @relation("AffectedSymbol", fields: [affectedSymbolId], references: [id], onDelete: Cascade)
+
+  @@unique([analysisRunId, changedSymbolId, affectedSymbolId])
+  @@index([analysisRunId, level])
+  @@index([affectedSymbolId])
+}
