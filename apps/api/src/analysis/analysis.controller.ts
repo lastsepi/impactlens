@@ -22,6 +22,13 @@ export class AnalysisController {
         return this.analysisService.analyzeProject(projectId);
     }
 
+    @Get()
+    getAnalysisRuns(
+        @Param("projectId", ParseUUIDPipe) projectId: string
+    ) {
+        return this.analysisService.getAnalysisRuns(projectId);
+    }
+
     @Get(":analysisRunId/symbols")
     getAnalysisSymbols(
         @Param("projectId", ParseUUIDPipe) projectId: string,

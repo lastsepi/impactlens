@@ -278,4 +278,41 @@ export class AnalysisService {
             symbols
         };
     }
+
+async getAnalysisRuns(projectId: string) {
+    const project = await this.prisma.project.findUnique({
+        where: {
+            id: projectId
+        }
+    });
+
+    if (!project) {
+        throw new NotFoundException("Project not found.");
+    }
+
+    const runs = await this.prisma.analysisRun.findMany({
+        where: {
+            projectId
+        },
+        orderBy: {
+            createdAt: "desc"
+        },
+        select: {
+            id: true,
+            status: true,
+            analyzerVersion: true,
+            filesScanned: true,
+            startedAt: true,
+            finishedAt: true,
+            createdAt: true,
+            errorMessage: true
+        }
+    });
+
+    return {
+        total: runs.length,
+        runs
+    };
+}
+
 }
