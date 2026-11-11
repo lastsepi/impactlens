@@ -3,8 +3,15 @@ import {
     Controller,
     Get,
     Param,
-    ParseUUIDPipe
+    ParseEnumPipe,
+    ParseUUIDPipe,
+    Query
 } from "@nestjs/common";
+
+import {
+    DependencyType,
+    SymbolKind
+} from "../generated/prisma/client.js";
 
 import { GraphService } from "./graph.service.js";
 
@@ -17,11 +24,29 @@ export class GraphController {
     @Get()
     getDependencyGraph(
         @Param("projectId", ParseUUIDPipe) projectId: string,
-        @Param("analysisRunId", ParseUUIDPipe) analysisRunId: string
+        @Param("analysisRunId", ParseUUIDPipe) analysisRunId: string,
+        @Query("search") search?: string,
+        @Query(
+            "kind",
+            new ParseEnumPipe(SymbolKind, { optional: true })
+        )
+        kind?: SymbolKind,
+        @Query(
+            "dependencyType",
+            new ParseEnumPipe(DependencyType, { optional: true })
+        )
+        dependencyType?: DependencyType,
+        @Query("filePath") filePath?: string
     ) {
         return this.graphService.getDependencyGraph(
             projectId,
-            analysisRunId
+            analysisRunId,
+            {
+                search,
+                kind,
+                dependencyType,
+                filePath
+            }
         );
     }
 }

@@ -21,6 +21,13 @@ export interface GraphEdge {
     type: DependencyType;
 }
 
+export interface GraphFilters {
+    search?: string;
+    kind?: SymbolKind;
+    dependencyType?: DependencyType;
+    filePath?: string;
+}
+
 export interface DependencyGraph {
     analysisRunId: string;
     totalNodes: number;

@@ -9,6 +9,7 @@ import { PrismaService } from "../prisma.service.js";
 import {
     DependencyGraph,
     GraphEdge,
+    GraphFilters,
     GraphNode
 } from "./graph.types.js";
 
@@ -20,7 +21,8 @@ export class GraphService {
 
     async getDependencyGraph(
         projectId: string,
-        analysisRunId: string
+        analysisRunId: string,
+        filters: GraphFilters = {}
     ): Promise<DependencyGraph> {
         const analysisRun =
             await this.prisma.analysisRun.findFirst({
@@ -66,6 +68,9 @@ export class GraphService {
                 }
             });
 
+        const normalizedSearch =
+            filters.search?.trim().toLowerCase();
+
         const nodes: GraphNode[] = symbols
             .map((symbol) => ({
                 id: symbol.id,
@@ -76,6 +81,42 @@ export class GraphService {
                 startLine: symbol.startLine,
                 endLine: symbol.endLine
             }))
+            .filter((node) => {
+                if (
+                    filters.kind &&
+                    node.kind !== filters.kind
+                ) {
+                    return false;
+                }
+
+                if (
+                    filters.filePath &&
+                    node.filePath !== filters.filePath
+                ) {
+                    return false;
+                }
+
+                if (normalizedSearch) {
+                    const nameMatches =
+                        node.name.toLowerCase().includes(
+                            normalizedSearch
+                        );
+
+                    const qualifiedNameMatches =
+                        node.qualifiedName?.toLowerCase().includes(
+                            normalizedSearch
+                        ) ?? false;
+
+                    if (
+                        !nameMatches &&
+                        !qualifiedNameMatches
+                    ) {
+                        return false;
+                    }
+                }
+
+                return true;
+            })
             .sort((a, b) =>
                 a.filePath.localeCompare(b.filePath) ||
                 a.startLine - b.startLine ||
@@ -83,7 +124,24 @@ export class GraphService {
                 a.id.localeCompare(b.id)
             );
 
+        const nodeIds = new Set(
+            nodes.map((node) => node.id)
+        );
+
         const edges: GraphEdge[] = dependencies
+            .filter((dependency) => {
+                if (
+                    filters.dependencyType &&
+                    dependency.type !== filters.dependencyType
+                ) {
+                    return false;
+                }
+
+                return (
+                    nodeIds.has(dependency.sourceSymbolId) &&
+                    nodeIds.has(dependency.targetSymbolId)
+                );
+            })
             .map((dependency) => ({
                 id: dependency.id,
                 source: dependency.sourceSymbolId,
