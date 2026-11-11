@@ -8,6 +8,7 @@ import { SourceFilesModule } from "./source-files/source-files.module.js";
 import { AnalyzerModule } from "./analyzer/analyzer.module.js";
 import { AnalysisModule } from "./analysis/analysis.module.js";
 import { ImpactModule } from "./impact/impact.module.js";
+import { GraphModule } from "./graph/graph.module.js";
 
 @Module({
     imports: [
@@ -16,7 +17,8 @@ import { ImpactModule } from "./impact/impact.module.js";
         SourceFilesModule,
         AnalyzerModule,
         AnalysisModule,
-        ImpactModule
+        ImpactModule,
+        GraphModule
     ],
     controllers: [AppController]
 })
