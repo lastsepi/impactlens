@@ -1,0 +1,14 @@
+{
+  "name": "impactlens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Static code analysis and change impact visualization platform.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {},
+  "engines": {
+    "node": ">=24"
+  }
+}
