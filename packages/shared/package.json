@@ -2,5 +2,18 @@
     "name": "@impactlens/shared",
     "version": "0.1.0",
     "private": true,
-    "description": "Shared types, interfaces and utilities for ImpactLens."
+    "description": "Shared types, interfaces and utilities for ImpactLens.",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+          "types": "./dist/index.d.ts",
+          "require": "./dist/index.js",
+          "default": "./dist/index.js"
+        }
+      },
+    "scripts": {
+      "build": "tsc -p tsconfig.json",
+      "check": "node -e \"console.log('Shared workspace is working!')\""
+    }
   }

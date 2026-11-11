@@ -1,0 +1,12 @@
+{
+    "name": "@impactlens/api",
+    "version": "0.1.0",
+    "private": true,
+    "description": "ImpactLens backend API.",
+    "dependencies": {
+      "@impactlens/shared": "0.1.0"
+    },
+    "scripts": {
+        "build": "tsc -p tsconfig.json"
+    }
+  }

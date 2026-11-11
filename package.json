@@ -10,5 +10,8 @@
   "scripts": {},
   "engines": {
     "node": ">=24"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
   }
 }
