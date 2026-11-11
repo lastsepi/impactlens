@@ -30,3 +30,6 @@ Thumbs.db
 # IDE
 .vscode/
 apps/api/src/generated/prisma/
+# Uploaded source files
+/storage/
+/apps/api/storage/

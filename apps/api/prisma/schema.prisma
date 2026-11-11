@@ -67,6 +67,7 @@ model SourceFile {
   language       String
   sizeBytes      Int?
   contentHash    String?
+  storageKey     String?      @unique
   lastAnalyzedAt DateTime?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
